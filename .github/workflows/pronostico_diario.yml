@@ -28,6 +28,15 @@ jobs:
         run: |
           pip install torch --index-url https://download.pytorch.org/whl/cpu
           pip install -r requirements.txt
+      - name: Probar conexión con XM y Open-Meteo
+        continue-on-error: true
+        run: |
+             curl -s -o /dev/null --max-time 30 -w "XM:         HTTP %{http_code} en %{time_total}s\n" \
+               -X POST https://servapibi.xm.com.co/Lists -H "Content-Type: application/json" \
+               -d '{"MetricId":"ListadoMetricas"}' || echo "XM:         ❌ sin conexión"
+             curl -s -o /dev/null --max-time 30 -w "Open-Meteo: HTTP %{http_code} en %{time_total}s\n" \
+               "https://api.open-meteo.com/v1/forecast?latitude=4.6&longitude=-74.1&hourly=cloud_cover" \
+               || echo "Open-Meteo: ❌ sin conexión"
       - name: Correr la liga
         run: python -m liga.run_diario --backtest ${{ github.event.inputs.backtest || 0 }}
       - name: Publicar resultados
