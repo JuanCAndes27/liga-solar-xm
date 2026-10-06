@@ -15,17 +15,44 @@ pydataxm parte la consulta por meses y hace las peticiones en paralelo (asyncio)
 from __future__ import annotations
 
 import datetime as dt
+import time
 from functools import lru_cache
 
 import pandas as pd
+import requests
 from pydataxm.pydataxm import ReadDB
+
+# pydataxm llama a requests SIN timeout: si el servidor de XM no contesta, la conexión se queda
+# colgada varios minutos. Ponemos un timeout por defecto (20 s para conectar, 120 s para leer).
+_request_original = requests.Session.request
+
+
+def _request_con_timeout(self, method, url, **kw):
+    if kw.get("timeout") is None:
+        kw["timeout"] = (20, 120)
+    return _request_original(self, method, url, **kw)
+
+
+requests.Session.request = _request_con_timeout
+
+
+def _con_reintentos(f, intentos=4, espera=20):
+    """XM a veces no responde (mantenimiento o bloqueo temporal): reintentamos con espera creciente."""
+    for i in range(1, intentos + 1):
+        try:
+            return f()
+        except (requests.exceptions.ConnectionError, requests.exceptions.Timeout) as e:
+            print(f"  XM no responde (intento {i}/{intentos}): {type(e).__name__}")
+            if i == intentos:
+                raise
+            time.sleep(espera * i)
 
 HORAS = [f"Hour{h:02d}" for h in range(1, 25)]
 
 
 @lru_cache(maxsize=1)
 def api() -> ReadDB:
-    return ReadDB()
+    return ReadDB()   # los reintentos se hacen en cada consulta (abajo)
 
 
 def _col(df: pd.DataFrame, sufijo: str) -> str:
@@ -39,7 +66,7 @@ def _col(df: pd.DataFrame, sufijo: str) -> str:
 def recursos_solares() -> list[str]:
     """Códigos de las plantas cuya fuente de energía es radiación solar (Values_EnerSource = 'RAD SOLAR')."""
     hoy = dt.date.today()
-    df = api().request_data("ListadoRecursos", "Sistema", hoy - dt.timedelta(days=1), hoy)
+    df = _con_reintentos(lambda: api().request_data("ListadoRecursos", "Sistema", hoy - dt.timedelta(days=1), hoy))
     try:
         es_solar = df[_col(df, "EnerSource")].astype(str).str.upper().str.contains("SOLAR")
     except KeyError:  # respaldo: buscar 'SOLAR' en cualquier columna de texto
@@ -53,7 +80,7 @@ def recursos_solares() -> list[str]:
 
 def generacion_por_recurso(inicio: dt.date, fin: dt.date) -> pd.DataFrame:
     """Generación horaria real (kWh) por planta, en formato largo: fecha_hora, codigo, kwh."""
-    df = api().request_data("Gene", "Recurso", inicio, fin)
+    df = _con_reintentos(lambda: api().request_data("Gene", "Recurso", inicio, fin))
     if df is None or df.empty:
         return pd.DataFrame(columns=["fecha_hora", "codigo", "kwh"])
     col_codigo = _col(df, "code")

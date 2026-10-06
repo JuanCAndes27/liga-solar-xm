@@ -26,13 +26,23 @@ def actualizar(demo: bool = False) -> tuple[pd.DataFrame, pd.DataFrame]:
         from . import clima as cl, xm
         hoy = dt.date.today()
         inicio = hoy - dt.timedelta(days=DIAS_HISTORIA)
-        print("Descargando generación solar de XM…")
-        gen = xm.generacion_solar_nacional(inicio, hoy)
         print("Descargando clima de Open-Meteo…")
         clima = cl.clima_nucleos()
+        viejo = (pd.read_csv(HIST, parse_dates=["fecha_hora"])[["fecha_hora", "solar_mwh"]]
+                 if HIST.exists() else None)
+        print("Descargando generación solar de XM…")
+        try:
+            gen = xm.generacion_solar_nacional(inicio, hoy)
+        except Exception as e:  # noqa: BLE001
+            if viejo is None:
+                raise RuntimeError(
+                    "XM no respondió y no hay datos guardados en datos/historico.csv todavía. "
+                    "Vuelve a correr la liga más tarde.") from e
+            print(f"  ⚠ XM no respondió ({type(e).__name__}): uso la generación guardada en caché "
+                  f"(hasta {viejo.fecha_hora.max():%Y-%m-%d}) con el clima nuevo de Open-Meteo.")
+            gen = viejo
         # Mezclamos con el caché para no perder historia
-        if HIST.exists():
-            viejo = pd.read_csv(HIST, parse_dates=["fecha_hora"])[["fecha_hora", "solar_mwh"]]
+        if viejo is not None:
             gen = pd.concat([viejo, gen]).drop_duplicates("fecha_hora", keep="last")
     gen = _dias_completos(gen)
     hist = gen.merge(clima, on="fecha_hora", how="left").sort_values("fecha_hora")
