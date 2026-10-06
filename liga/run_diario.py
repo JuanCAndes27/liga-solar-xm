@@ -143,7 +143,8 @@ def grafica(hist, largo, titulo, archivo):
     fig, ax = plt.subplots(figsize=(9, 4.2), dpi=120)
     ax.fill_between(range(24), real.solar_mwh, color="#E9C46A", alpha=.35, label="Real (XM)")
     ax.plot(range(24), real.solar_mwh.to_numpy(), color="#8A6D1F", lw=2)
-    paleta = ["#C8553D", "#588B8B", "#6D597A", "#2A6F97", "#B56576", "#43AA8B"]
+    paleta = ["#C8553D", "#588B8B", "#6D597A", "#2A6F97", "#B56576", "#43AA8B",
+              "#E07A5F", "#3D405B", "#81B29A", "#F2A541", "#5E548E", "#9C6644"]
     for i, (k, g) in enumerate(largo[largo.fecha == d].groupby("modelo")):
         ax.plot(g.hora, g.pred, lw=1.6, ls="--" if k == BASE else "-", color=paleta[i % len(paleta)], label=k)
     ax.set(title=f"{titulo} — {d}", xlabel="Hora", ylabel="Generación solar SIN (MWh)", xlim=(4, 20))

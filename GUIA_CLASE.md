@@ -20,6 +20,25 @@
 5. Ensamble de 5 semillas y medir si baja la varianza del error.
 6. **Pro:** predecir intervalos (cuantiles 10–50–90) con pinball loss.
 
+### Soluciones de referencia (rama `retos-soluciones`)
+| Reto | Archivo | Idea clave |
+|---|---|---|
+| 1 | `modelos/persistencia_3dias.py` | Promedio horario de los 3 últimos días completos |
+| 2 | `modelos/solarnet_nubes.py` | Features extra: nubosidad en h-1 y h+1 |
+| 3 | `modelos/solarnet_ponderada.py` | MSE ponderado por el perfil medio de generación (piso 0.1) |
+| 4 | `modelos/solarnet_transformer.py`, `modelos/solarnet_cnn.py` | Encoder 1 capa/2 cabezas · Conv1D dilatada (1-2-4) |
+| 5 | `modelos/solarnet_ensamble.py` + `python -m experimentos.varianza_semillas` | Promedio de 5 semillas; mide la desviación del MAE entre semillas |
+| 6 | `modelos/solarnet_cuantiles.py` + `python -m experimentos.cobertura_cuantiles` | 3 salidas monótonas + pinball; la liga usa q50; reporta cobertura 10–90 |
+
+Las variantes comparten `modelos/_solarnet_comun.py` (empieza por `_`, la liga no lo carga) y usan
+salida **softplus** en lugar de ReLU: con ReLU a la salida, ~3 de cada 5 semillas quedan "muertas"
+(predicen 0 MWh todo el día). Buen tema de discusión.
+
+Resultados con datos sintéticos (`--demo`, 5 días): todas las SolarNet quedan en 22–28 MWh de MAE
+(diferencias dentro del ruido de 5 días); el ensamble baja ~2/3 la desviación del error entre semillas;
+el intervalo 10–90 cubre solo ~56 % (ideal 80 %) → la red está sobreconfiada porque los cuantiles se
+ajustan sobre los mismos datos de entrenamiento. Extensión: calibrar con *conformal prediction*.
+
 ## Preguntas de discusión
 - ¿Por qué el backtest se ve mejor que la liga oficial? (el "pronóstico" de clima pasado es casi observación)
 - Si entra un parque solar de 200 MW nuevo, ¿qué le pasa al modelo? ¿Cómo lo arreglarían?
