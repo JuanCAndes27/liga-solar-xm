@@ -1,9 +1,10 @@
-"""Rowan-SolarHybrid: modelo físico simple + red residual PyTorch.
+"""Rowan-SolarHybrid v2: baseline físico multiventana + red residual PyTorch.
 
-Usa solamente las entradas oficiales de la Liga Solar XM; no consulta APIs.
-La referencia física ajusta generación histórica por irradiancia pronosticada.
-Una MLP pequeña aprende correcciones de potencia sobre esa referencia.
+Compatible con la interfaz oficial; no requiere nuevas dependencias ni APIs.
+Los datos de entrenamiento se generan simulando el rezago real de XM.
 """
+import datetime as dt
+
 import numpy as np
 import pandas as pd
 import torch
@@ -18,11 +19,11 @@ class RedResidual(nn.Module):
     def __init__(self, n_entradas):
         super().__init__()
         self.red = nn.Sequential(
-            nn.Linear(n_entradas, 24),
-            nn.Tanh(),
-            nn.Linear(24, 12),
-            nn.Tanh(),
-            nn.Linear(12, 1),
+            nn.Linear(n_entradas, 32),
+            nn.SiLU(),
+            nn.Linear(32, 16),
+            nn.SiLU(),
+            nn.Linear(16, 1),
         )
 
     def forward(self, x):
@@ -36,44 +37,60 @@ def _dias_completos(historia):
     for fecha, grupo in h.groupby(h.fecha_hora.dt.date):
         grupo = grupo.sort_values("fecha_hora")
         if (len(grupo) == 24 and grupo.fecha_hora.dt.hour.nunique() == 24
-                and grupo[["solar_mwh", "radiacion"]].notna().all().all()):
-            dias[fecha] = grupo.set_index(grupo.fecha_hora.dt.hour)
+                and np.array_equal(grupo.fecha_hora.dt.hour.to_numpy(), np.arange(24))
+                and np.isfinite(grupo[["solar_mwh", "radiacion"]].to_numpy(float)).all()):
+            dias[fecha] = grupo
     return dias
 
 
-def _entradas(dias, fecha, ult_fecha, escala, clima_obj):
-    """Predicción física y características, sin consultar el futuro real."""
-    disponibles = [d for d in sorted(dias) if d <= ult_fecha]
-    ultimos = disponibles[-7:]
-    if not ultimos:
-        raise ValueError("No hay historia anterior al objetivo")
-    gen = np.stack([dias[d]["solar_mwh"].to_numpy(float) for d in ultimos])
-    rad = np.stack([dias[d]["radiacion"].to_numpy(float) for d in ultimos])
-    gen_ref = np.nanmean(gen, axis=0)
-    rad_ref = np.nanmean(rad, axis=0)
-    futuro = clima_obj.sort_values("fecha_hora")
-    g = np.nan_to_num(futuro["radiacion"].to_numpy(float), nan=0.0)
-    nube = np.nan_to_num(futuro["nubosidad"].to_numpy(float), nan=50.0)
-    temp = np.nan_to_num(futuro["temperatura"].to_numpy(float), nan=25.0)
-    hora = futuro.fecha_hora.dt.hour.to_numpy()
-    if len(hora) != 24 or np.unique(hora).size != 24:
-        raise ValueError("clima_dia debe contener 24 horas distintas")
-    # Cociente acotado: evita divisiones explosivas al amanecer/atardecer.
-    cociente = np.clip(g / np.maximum(rad_ref, 100.0), 0, 2.5)
-    fisica = np.clip(gen_ref * cociente, 0, None)
-    fisica[g < 5] = 0.0
-    dia_ano = pd.Timestamp(fecha).dayofyear
+def _caracteristicas(dias, fecha, corte, escala, clima_obj):
+    """Ninguna generación de fecha posterior a corte interviene en la referencia."""
+    disponibles = [d for d in dias if d <= corte]
+    if not disponibles:
+        raise ValueError("No hay generación publicada disponible")
+    historicos = [dias[d] for d in disponibles[-21:]]
+    gen = np.stack([g["solar_mwh"].to_numpy(float) for g in historicos])
+    rad = np.stack([g["radiacion"].to_numpy(float) for g in historicos])
+    c = clima_obj.sort_values("fecha_hora")
+    if len(c) != 24 or not np.array_equal(
+        c.fecha_hora.dt.hour.to_numpy(), np.arange(24)
+    ):
+        raise ValueError("Se requieren 24 horas ordenables de 00 a 23")
+    g = np.clip(np.nan_to_num(c["radiacion"].to_numpy(float), nan=0), 0, 1400)
+    nube = np.clip(np.nan_to_num(c["nubosidad"].to_numpy(float), nan=50), 0, 100)
+    temp = np.clip(np.nan_to_num(c["temperatura"].to_numpy(float), nan=25), 0, 50)
+
+    # Persistencia de 7 días y referencia más estable de hasta 21 días.
+    gen7 = gen[-7:].mean(axis=0)
+    gen21 = gen.mean(axis=0)
+    rad7 = rad[-7:].mean(axis=0)
+    rad21 = rad.mean(axis=0)
+    # La irradiancia horizontal media regional es imperfecta al amanecer.
+    # Combinamos la proporcionalidad física con la persistencia para evitar
+    # sobrecorrecciones extremas cerca de irradiancia cero.
+    base7 = gen7 * np.clip(g / np.maximum(rad7, 120), 0, 2.2)
+    base21 = gen21 * np.clip(g / np.maximum(rad21, 120), 0, 2.2)
+    mezcla7 = 0.75 * base7 + 0.25 * gen7
+    mezcla21 = 0.75 * base21 + 0.25 * gen21
+    fisica = 0.65 * mezcla7 + 0.35 * mezcla21
+
+    # Corrección térmica suave: aproximación relativa, no temperatura de celda.
+    temp_ref = np.mean(
+        np.stack([np.nan_to_num(x["temperatura"].to_numpy(float), nan=25)
+                  for x in historicos[-7:]]), axis=0
+    )
+    factor_temp = np.clip(1 - 0.003 * (temp - temp_ref), 0.9, 1.1)
+    fisica = np.clip(fisica * factor_temp, 0, None)
+    hora = np.arange(24)
+    est = 2 * np.pi * pd.Timestamp(fecha).dayofyear / 365.25
     x = np.column_stack([
-        fisica / escala,
-        gen_ref / escala,
-        np.clip(g, 0, 1400) / 1000,
-        np.clip(rad_ref, 0, 1400) / 1000,
-        np.clip(nube, 0, 100) / 100,
-        np.clip(temp - 25, -25, 25) / 20,
+        fisica / escala, gen7 / escala, gen21 / escala,
+        base7 / escala, base21 / escala,
+        g / 1000, rad7 / 1000, rad21 / 1000,
+        nube / 100, (temp - 25) / 20,
         np.sin(2 * np.pi * hora / 24),
         np.cos(2 * np.pi * hora / 24),
-        np.full(24, np.sin(2 * np.pi * dia_ano / 365.25)),
-        np.full(24, np.cos(2 * np.pi * dia_ano / 365.25)),
+        np.full(24, np.sin(est)), np.full(24, np.cos(est)),
     ]).astype(np.float32)
     return fisica, x, g
 
@@ -83,48 +100,52 @@ def predecir(historia, clima_dia):
     torch.set_num_threads(1)
     dias = _dias_completos(historia)
     if len(dias) < 14:
-        raise ValueError("Se requieren al menos 14 días completos de historia")
+        raise ValueError("Se necesitan al menos 14 días completos")
     fechas = sorted(dias)
     futuro = clima_dia.copy()
     futuro["fecha_hora"] = pd.to_datetime(futuro["fecha_hora"])
     objetivo = futuro.fecha_hora.min().date()
     rezago = max((objetivo - fechas[-1]).days, 1)
-    escala = max(float(np.nanpercentile(historia["solar_mwh"], 99)), 1.0)
-
-    fis_fut, x_fut, g_fut = _entradas(
+    escala = max(float(np.nanpercentile(historia["solar_mwh"], 99)), 1)
+    base, x_obj, radiacion = _caracteristicas(
         dias, objetivo, fechas[-1], escala, futuro
     )
-    xs, ys = [], []
-    # El entrenamiento simula el mismo rezago de publicación que la predicción.
-    for fecha in fechas:
-        referencia = fecha - pd.Timedelta(days=rezago).to_pytimedelta()
-        if referencia not in dias:
+
+    xs, ys, pesos = [], [], []
+    for dia in fechas:
+        corte = dia - dt.timedelta(days=rezago)
+        # Exigir al menos 14 días conocidos antes de esta fecha.
+        if sum(d <= corte for d in fechas) < 14:
             continue
-        target = dias[fecha].reset_index(drop=True)
-        if target[["nubosidad", "temperatura"]].isna().any().any():
+        dato = dias[dia]
+        if not np.isfinite(dato[["nubosidad", "temperatura"]].to_numpy(float)).all():
             continue
-        fis, x, _ = _entradas(dias, fecha, referencia, escala, target)
-        real = target["solar_mwh"].to_numpy(float)
-        valido = np.isfinite(real)
-        xs.append(x[valido])
-        ys.append(((real - fis) / escala)[valido].astype(np.float32))
+        fis, x, _ = _caracteristicas(dias, dia, corte, escala, dato)
+        real = dato["solar_mwh"].to_numpy(float)
+        xs.append(x)
+        ys.append(((real - fis) / escala).astype(np.float32))
+        # Los rankings evalúan las horas 06 a 18, no las 24 por igual.
+        pesos.append(np.where((np.arange(24) >= 6) & (np.arange(24) <= 18),
+                              1.0, 0.15).astype(np.float32))
 
     if not xs:
-        return np.maximum(fis_fut, 0)
-    X = torch.from_numpy(np.concatenate(xs, axis=0))
-    Y = torch.from_numpy(np.concatenate(ys, axis=0))
+        return np.clip(base, 0, None)
+    X = torch.from_numpy(np.concatenate(xs))
+    Y = torch.from_numpy(np.concatenate(ys))
+    W = torch.from_numpy(np.concatenate(pesos))
     red = RedResidual(X.shape[1])
-    opt = torch.optim.AdamW(red.parameters(), lr=0.008, weight_decay=0.01)
-    for _ in range(140):
+    opt = torch.optim.AdamW(red.parameters(), lr=0.005, weight_decay=0.02)
+    for _ in range(180):
         opt.zero_grad()
-        estimacion = red(X)
-        perdida = nn.functional.smooth_l1_loss(estimacion, Y, beta=0.1)
+        err = nn.functional.smooth_l1_loss(red(X), Y, beta=0.1, reduction="none")
+        perdida = (err * W).sum() / W.sum()
         perdida.backward()
         opt.step()
 
     red.eval()
     with torch.no_grad():
-        residual = red(torch.from_numpy(x_fut)).numpy() * escala
-    pred = np.clip(fis_fut + residual, 0, None)
-    pred[g_fut < 5] = 0
+        residual = red(torch.from_numpy(x_obj)).numpy() * escala
+    # En las horas nocturnas no permitir correcciones positivas espurias.
+    pred = np.clip(base + residual, 0, None)
+    pred[(np.arange(24) < 6) | (np.arange(24) > 19)] = 0
     return pred.astype(float)
