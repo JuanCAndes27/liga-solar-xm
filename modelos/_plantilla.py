@@ -17,8 +17,8 @@ pérdida solo en horas de sol, features de nubosidad de la tarde, capacidad crec
 """
 import numpy as np
 
-NOMBRE = "Rowan"
-AUTOR = "rowanvrock96"
+NOMBRE = ""
+AUTOR = ""
 
 
 def predecir(historia, clima_dia):
