@@ -1,6 +1,6 @@
 # ☀️ Liga de Pronóstico Solar Colombia — Leaderboard
 
-_Actualizado: 2026-10-12 15:40 (hora Colombia) · Métrica: MAE en horas de sol (06–18 h) · Skill = 1 − MAE/MAE_persistencia (positivo = le ganas a la persistencia)_
+_Actualizado: 2026-10-13 13:43 (hora Colombia) · Métrica: MAE en horas de sol (06–18 h) · Skill = 1 − MAE/MAE_persistencia (positivo = le ganas a la persistencia)_
 
 ## 🏆 Liga oficial (predicciones hechas ANTES de conocer el dato real)
 
@@ -11,11 +11,11 @@ _Actualizado: 2026-10-12 15:40 (hora Colombia) · Métrica: MAE en horas de sol 
 | 🥉 | SolarNet-GRU | profe | 3 | 199.2 | 13.5% | -15.3% |
 | 4 | SolarNet-Ensamble×5 | profe (reto 5) | 3 | 203.0 | 13.8% | -17.9% |
 | 5 | SolarNet-Cuantiles (q50) | profe (reto 6) | 3 | 204.9 | 13.9% | -19.0% |
-| 6 | SolarNet-Nubes | profe (reto 2) | 3 | 220.8 | 15.0% | -27.0% |
+| 6 | SolarNet-Nubes | profe (reto 2) | 3 | 220.9 | 15.0% | -27.0% |
 | 7 | SolarNet-Transformer | profe (reto 4) | 3 | 225.5 | 15.3% | -30.4% |
 | 8 | SolarNet-CNN | profe (reto 4) | 3 | 240.7 | 16.4% | -39.8% |
-| 9 | Persistencia 3 días | profe (reto 1) | 3 | 247.8 | 16.8% | -42.3% |
-| 10 | Persistencia × radiación | profe | 3 | 286.6 | 19.5% | -45.9% |
+| 9 | Persistencia 3 días | profe (reto 1) | 3 | 247.8 | 16.9% | -42.3% |
+| 10 | Persistencia × radiación | profe | 3 | 286.7 | 19.5% | -45.9% |
 
 ![último día](resultados/ultimo_dia.png)
 
