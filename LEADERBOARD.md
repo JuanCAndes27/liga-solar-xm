@@ -1,22 +1,22 @@
 # ☀️ Liga de Pronóstico Solar Colombia — Leaderboard
 
-_Actualizado: 2026-10-14 07:20 (hora Colombia) · Métrica: MAE en horas de sol (06–18 h) · Skill = 1 − MAE/MAE_persistencia (positivo = le ganas a la persistencia)_
+_Actualizado: 2026-10-15 07:19 (hora Colombia) · Métrica: MAE en horas de sol (06–18 h) · Skill = 1 − MAE/MAE_persistencia (positivo = le ganas a la persistencia)_
 
 ## 🏆 Liga oficial (predicciones hechas ANTES de conocer el dato real)
 
 | # | Modelo | Autor | Días | MAE (MWh) | nMAE | Skill vs persistencia |
 |---|---|---|---|---|---|---|
-| 🥇 | SolarNet-Ponderada | profe (reto 3) | 3 | 149.0 | 10.1% | +37.1% |
-| 🥈 | SolarNet-GRU | profe | 3 | 174.8 | 11.9% | +25.0% |
-| 🥉 | SolarNet-Nubes | profe (reto 2) | 3 | 185.2 | 12.6% | +20.5% |
-| 4 | SolarNet-Ensamble×5 | profe (reto 5) | 3 | 193.9 | 13.2% | +19.0% |
-| 5 | SolarNet-Cuantiles (q50) | profe (reto 6) | 3 | 196.7 | 13.4% | +17.8% |
-| 6 | Rowan-SolarHybrid | rowanvrock96 | 2 | 202.2 | 12.7% | +23.5% |
-| 7 | SolarNet-Transformer | profe (reto 4) | 3 | 208.7 | 14.2% | +11.5% |
-| 8 | SolarNet-CNN | profe (reto 4) | 3 | 229.3 | 15.6% | +3.0% |
-| 9 | Persistencia | profe | 3 | 243.5 | 16.6% | — |
-| 10 | Persistencia 3 días | profe (reto 1) | 3 | 293.5 | 20.0% | -15.8% |
-| 11 | Persistencia × radiación | profe | 3 | 294.4 | 20.0% | -30.3% |
+| 🥇 | SolarNet-Ponderada | profe (reto 3) | 6 | 206.2 | 14.6% | +11.1% |
+| 🥈 | SolarNet-Cuantiles (q50) | profe (reto 6) | 6 | 217.9 | 15.5% | +5.4% |
+| 🥉 | Rowan-SolarHybrid | rowanvrock96 | 5 | 224.4 | 15.5% | +7.4% |
+| 4 | SolarNet-Nubes | profe (reto 2) | 6 | 224.8 | 15.9% | +1.8% |
+| 5 | SolarNet-GRU | profe | 6 | 224.8 | 15.9% | +3.3% |
+| 6 | SolarNet-Ensamble×5 | profe (reto 5) | 6 | 229.3 | 16.3% | +2.8% |
+| 7 | SolarNet-Transformer | profe (reto 4) | 6 | 230.4 | 16.3% | +1.1% |
+| 8 | Persistencia | profe | 6 | 248.0 | 17.6% | — |
+| 9 | SolarNet-CNN | profe (reto 4) | 6 | 268.2 | 19.0% | -11.5% |
+| 10 | Persistencia 3 días | profe (reto 1) | 6 | 272.1 | 19.3% | -14.8% |
+| 11 | Persistencia × radiación | profe | 6 | 332.2 | 23.6% | -45.1% |
 
 ![último día](resultados/ultimo_dia.png)
 
