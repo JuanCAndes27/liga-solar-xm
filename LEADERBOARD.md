@@ -1,21 +1,21 @@
 # ☀️ Liga de Pronóstico Solar Colombia — Leaderboard
 
-_Actualizado: 2026-10-20 11:06 (hora Colombia) · Métrica: MAE en horas de sol (06–18 h) · Skill = 1 − MAE/MAE_persistencia (positivo = le ganas a la persistencia)_
+_Actualizado: 2026-10-21 11:23 (hora Colombia) · Métrica: MAE en horas de sol (06–18 h) · Skill = 1 − MAE/MAE_persistencia (positivo = le ganas a la persistencia)_
 
 ## 🏆 Liga oficial (predicciones hechas ANTES de conocer el dato real)
 
 | # | Modelo | Autor | Días | MAE (MWh) | nMAE | Skill vs persistencia |
 |---|---|---|---|---|---|---|
-| 🥇 | SolarNet-Nubes | profe (reto 2) | 10 | 198.2 | 13.3% | +24.4% |
-| 🥈 | SolarNet-Ponderada | profe (reto 3) | 10 | 203.2 | 13.7% | +28.7% |
-| 🥉 | SolarNet-Cuantiles (q50) | profe (reto 6) | 10 | 205.9 | 13.9% | +24.3% |
-| 4 | SolarNet-GRU | profe | 10 | 206.5 | 13.9% | +25.2% |
-| 5 | SolarNet-Ensamble×5 | profe (reto 5) | 10 | 211.9 | 14.3% | +23.3% |
-| 6 | SolarNet-CNN | profe (reto 4) | 10 | 223.5 | 15.0% | +14.1% |
-| 7 | SolarNet-Transformer | profe (reto 4) | 10 | 227.9 | 15.3% | +15.9% |
-| 8 | Persistencia 3 días | profe (reto 1) | 10 | 288.8 | 19.4% | -2.0% |
-| 9 | Persistencia × radiación | profe | 10 | 292.6 | 19.7% | +4.7% |
-| 10 | Persistencia | profe | 10 | 353.2 | 23.8% | — |
+| 🥇 | SolarNet-Nubes | profe (reto 2) | 11 | 191.2 | 13.0% | +27.5% |
+| 🥈 | SolarNet-Ponderada | profe (reto 3) | 11 | 194.9 | 13.3% | +31.7% |
+| 🥉 | SolarNet-Cuantiles (q50) | profe (reto 6) | 11 | 198.4 | 13.5% | +27.4% |
+| 4 | SolarNet-GRU | profe | 11 | 199.8 | 13.6% | +27.9% |
+| 5 | SolarNet-Ensamble×5 | profe (reto 5) | 11 | 203.9 | 13.9% | +26.5% |
+| 6 | SolarNet-CNN | profe (reto 4) | 11 | 215.7 | 14.7% | +17.6% |
+| 7 | SolarNet-Transformer | profe (reto 4) | 11 | 221.0 | 15.1% | +18.8% |
+| 8 | Persistencia 3 días | profe (reto 1) | 11 | 273.1 | 18.6% | +3.7% |
+| 9 | Persistencia × radiación | profe | 11 | 276.3 | 18.9% | +9.8% |
+| 10 | Persistencia | profe | 11 | 348.1 | 23.7% | — |
 
 ![último día](resultados/ultimo_dia.png)
 
