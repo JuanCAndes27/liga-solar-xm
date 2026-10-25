@@ -1,22 +1,22 @@
 # ☀️ Liga de Pronóstico Solar Colombia — Leaderboard
 
-_Actualizado: 2026-10-24 09:59 (hora Colombia) · Métrica: MAE en horas de sol (06–18 h) · Skill = 1 − MAE/MAE_persistencia (positivo = le ganas a la persistencia)_
+_Actualizado: 2026-10-25 10:10 (hora Colombia) · Métrica: MAE en horas de sol (06–18 h) · Skill = 1 − MAE/MAE_persistencia (positivo = le ganas a la persistencia)_
 
 ## 🏆 Liga oficial (predicciones hechas ANTES de conocer el dato real)
 
 | # | Modelo | Autor | Días | MAE (MWh) | nMAE | Skill vs persistencia |
 |---|---|---|---|---|---|---|
-| 🥇 | SolarNet-Cuantiles (q50) | profe (reto 6) | 14 | 186.9 | 12.9% | +28.7% |
-| 🥈 | SolarNet-Ponderada | profe (reto 3) | 14 | 187.2 | 12.9% | +30.0% |
-| 🥉 | SolarNet-Ensamble×5 | profe (reto 5) | 14 | 198.4 | 13.7% | +25.6% |
-| 4 | SolarNet-Nubes | profe (reto 2) | 14 | 200.9 | 13.9% | +24.3% |
-| 5 | Rowan-SolarHybrid | rowanvrock96 | 13 | 202.0 | 13.8% | +26.8% |
-| 6 | SolarNet-Transformer | profe (reto 4) | 14 | 203.2 | 14.0% | +22.9% |
-| 7 | SolarNet-GRU | profe | 14 | 203.7 | 14.1% | +23.7% |
-| 8 | SolarNet-CNN | profe (reto 4) | 14 | 219.8 | 15.2% | +16.5% |
-| 9 | Persistencia × radiación | profe | 14 | 262.9 | 18.1% | +1.2% |
-| 10 | Persistencia 3 días | profe (reto 1) | 14 | 282.7 | 19.5% | -10.9% |
-| 11 | Persistencia | profe | 14 | 305.8 | 21.1% | — |
+| 🥇 | SolarNet-Ponderada | profe (reto 3) | 16 | 187.3 | 13.1% | +33.0% |
+| 🥈 | SolarNet-Cuantiles (q50) | profe (reto 6) | 16 | 189.2 | 13.2% | +31.3% |
+| 🥉 | SolarNet-Nubes | profe (reto 2) | 16 | 196.9 | 13.8% | +28.6% |
+| 4 | SolarNet-Ensamble×5 | profe (reto 5) | 16 | 197.1 | 13.8% | +29.2% |
+| 5 | SolarNet-Transformer | profe (reto 4) | 16 | 200.4 | 14.0% | +27.0% |
+| 6 | SolarNet-GRU | profe | 16 | 201.2 | 14.1% | +27.7% |
+| 7 | Rowan-SolarHybrid | rowanvrock96 | 15 | 203.8 | 14.1% | +29.6% |
+| 8 | SolarNet-CNN | profe (reto 4) | 16 | 217.5 | 15.2% | +20.7% |
+| 9 | Persistencia × radiación | profe | 16 | 253.2 | 17.7% | +7.7% |
+| 10 | Persistencia 3 días | profe (reto 1) | 16 | 303.6 | 21.2% | -10.4% |
+| 11 | Persistencia | profe | 16 | 318.5 | 22.3% | — |
 
 ![último día](resultados/ultimo_dia.png)
 
