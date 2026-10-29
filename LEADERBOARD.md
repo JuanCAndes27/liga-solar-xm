@@ -1,21 +1,21 @@
 # ☀️ Liga de Pronóstico Solar Colombia — Leaderboard
 
-_Actualizado: 2026-10-28 12:43 (hora Colombia) · Métrica: MAE en horas de sol (06–18 h) · Skill = 1 − MAE/MAE_persistencia (positivo = le ganas a la persistencia)_
+_Actualizado: 2026-10-29 12:52 (hora Colombia) · Métrica: MAE en horas de sol (06–18 h) · Skill = 1 − MAE/MAE_persistencia (positivo = le ganas a la persistencia)_
 
 ## 🏆 Liga oficial (predicciones hechas ANTES de conocer el dato real)
 
 | # | Modelo | Autor | Días | MAE (MWh) | nMAE | Skill vs persistencia |
 |---|---|---|---|---|---|---|
-| 🥇 | SolarNet-Cuantiles (q50) | profe (reto 6) | 17 | 216.3 | 15.2% | +27.5% |
-| 🥈 | SolarNet-Nubes | profe (reto 2) | 17 | 219.0 | 15.3% | +25.7% |
-| 🥉 | SolarNet-Ponderada | profe (reto 3) | 17 | 221.4 | 15.5% | +28.4% |
-| 4 | SolarNet-Ensamble×5 | profe (reto 5) | 17 | 222.0 | 15.6% | +26.3% |
-| 5 | SolarNet-CNN | profe (reto 4) | 17 | 225.5 | 15.8% | +22.4% |
-| 6 | SolarNet-GRU | profe | 17 | 227.6 | 15.9% | +24.9% |
-| 7 | SolarNet-Transformer | profe (reto 4) | 17 | 228.2 | 16.0% | +22.4% |
-| 8 | Persistencia × radiación | profe | 17 | 252.2 | 17.7% | +20.1% |
-| 9 | Persistencia 3 días | profe (reto 1) | 17 | 314.8 | 22.1% | -6.1% |
-| 10 | Persistencia | profe | 17 | 350.2 | 24.5% | — |
+| 🥇 | SolarNet-Nubes | profe (reto 2) | 19 | 217.4 | 15.3% | +29.1% |
+| 🥈 | SolarNet-Cuantiles (q50) | profe (reto 6) | 19 | 217.5 | 15.3% | +30.1% |
+| 🥉 | SolarNet-Ponderada | profe (reto 3) | 19 | 221.5 | 15.5% | +31.1% |
+| 4 | SolarNet-Ensamble×5 | profe (reto 5) | 19 | 222.5 | 15.6% | +29.1% |
+| 5 | SolarNet-CNN | profe (reto 4) | 19 | 225.1 | 15.8% | +25.6% |
+| 6 | SolarNet-GRU | profe | 19 | 225.8 | 15.9% | +28.2% |
+| 7 | SolarNet-Transformer | profe (reto 4) | 19 | 231.4 | 16.2% | +25.0% |
+| 8 | Persistencia × radiación | profe | 19 | 246.2 | 17.3% | +24.2% |
+| 9 | Persistencia 3 días | profe (reto 1) | 19 | 303.6 | 21.3% | +0.4% |
+| 10 | Persistencia | profe | 19 | 362.5 | 25.4% | — |
 
 ![último día](resultados/ultimo_dia.png)
 
